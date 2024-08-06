@@ -376,10 +376,11 @@ export function defaultsWithAPIKeys(apiKeys: LoaderEnv): Record<string, ABILoade
  * })
  * ```
  */
-export function defaultsWithEnv(env: LoaderEnv): Record<string, ABILoader | SignatureLookup> {
+export function defaultsWithEnv(env: LoaderEnv, prefix = ''): Record<string, ABILoader | SignatureLookup> {
     return {
         abiLoader: new MultiABILoader([
-            new SourcifyABILoader({ chainId: env.SOURCIFY_CHAIN_ID && Number(env.SOURCIFY_CHAIN_ID) || undefined }),
+            // TODO update the other references
+            new SourcifyABILoader({ chainId: env[`${prefix}${SOURCIFY_CHAIN_ID}` && Number(env.SOURCIFY_CHAIN_ID) || undefined }),
             new EtherscanABILoader({ apiKey: env.ETHERSCAN_API_KEY, baseURL: env.ETHERSCAN_BASE_URL }),
         ]),
         signatureLookup: new MultiSignatureLookup([
