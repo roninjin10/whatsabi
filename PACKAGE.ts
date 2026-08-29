@@ -98,11 +98,17 @@ const buildDocs = S.Shell.Build({
 // The Makefile name for the same build.
 const docs = S.Alias(buildDocs)
 
+// readiness gates dependents; the same probe then repeats as the health
+// check while the server is depended on, and consecutive failures fail the
+// dependent instead of hanging it. stop is the graceful-exit contract
+// applied before the process is killed.
 const serveDocs = S.Shell.Serve({
   bin: S.Host.bin("python"),
   args: ["-m", "http.server", "-d", "./docs"],
   data: [buildDocs],
   readiness: { port: 8000 },
+  health: { interval: "30s", failures: 2 },
+  stop: { signal: "SIGINT", grace: "5s" },
 })
 
 // Replaces the deploy half of .github/workflows/docs.yml: publish the
@@ -339,7 +345,6 @@ const refreshFixtures = S.Cron({
 })
 
 export const Package = S.Package({
-  defaultVisibility: "public",
   targets: {
     apiCompat,
     audit,
